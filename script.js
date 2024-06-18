@@ -22,7 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const movieDiv = document.createElement('div');
       movieDiv.classList.add('movie');
       movieDiv.innerHTML = `
-        <img src="https://image.tmdb.org/t/p/w500${movie.poster_path}" alt="${movie.title}">
+        <img src="https://image.tmdb.org/t/p/w200${movie.poster_path}" alt="${movie.title}">
         <p>${movie.title}</p>
       `;
       return movieDiv;

@@ -52,7 +52,7 @@ body {
   }
   
   .horizontal-list .movie {
-    min-width: 150px;
+    min-width: 100px;
     margin-right: 10px;
     text-align: center;
   }
@@ -73,11 +73,13 @@ body {
   
   .movie img {
     width: 100%;
+    height: auto;
     border-radius: 8px;
   }
   
   .movie p {
     margin: 5px 0 0 0;
     color: #333;
+    font-size: 0.8em;
   }
   
