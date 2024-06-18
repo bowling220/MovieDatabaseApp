@@ -1,9 +1,10 @@
 // Search.js
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { View, FlatList, StyleSheet, ScrollView } from 'react-native';
-import { TextInput, Button, ActivityIndicator, Title } from 'react-native-paper';
+import { TextInput, Button, ActivityIndicator, Title, Snackbar } from 'react-native-paper';
 import { searchMovies, getPopularMovies, getTrendingMovies } from './api';
 import MovieItem from './MovieItem';
+import debounce from 'lodash.debounce';
 
 const Search = ({ navigation }) => {
   const [query, setQuery] = useState('');
@@ -15,6 +16,8 @@ const Search = ({ navigation }) => {
   const [loadingPopular, setLoadingPopular] = useState(true);
   const [loadingTrendingToday, setLoadingTrendingToday] = useState(true);
   const [loadingTrendingThisWeek, setLoadingTrendingThisWeek] = useState(true);
+  const [snackbarVisible, setSnackbarVisible] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
   useEffect(() => {
     const fetchPopularMovies = async () => {
@@ -22,7 +25,7 @@ const Search = ({ navigation }) => {
         const response = await getPopularMovies();
         setPopularMovies(response.data.results);
       } catch (error) {
-        console.error(error);
+        handleApiError(error);
       } finally {
         setLoadingPopular(false);
       }
@@ -33,7 +36,7 @@ const Search = ({ navigation }) => {
         const response = await getTrendingMovies('day');
         setTrendingToday(response.data.results);
       } catch (error) {
-        console.error(error);
+        handleApiError(error);
       } finally {
         setLoadingTrendingToday(false);
       }
@@ -44,7 +47,7 @@ const Search = ({ navigation }) => {
         const response = await getTrendingMovies('week');
         setTrendingThisWeek(response.data.results);
       } catch (error) {
-        console.error(error);
+        handleApiError(error);
       } finally {
         setLoadingTrendingThisWeek(false);
       }
@@ -55,17 +58,30 @@ const Search = ({ navigation }) => {
     fetchTrendingThisWeek();
   }, []);
 
-  const handleSearch = async () => {
-    if (query.trim() === '') return;
-    setLoading(true);
-    try {
-      const response = await searchMovies(query);
-      setResults(response.data.results);
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setLoading(false);
-    }
+  const handleApiError = (error) => {
+    setErrorMessage(error.message);
+    setSnackbarVisible(true);
+  };
+
+  const debouncedSearch = useCallback(
+    debounce(async (searchQuery) => {
+      if (searchQuery.trim() === '') return;
+      setLoading(true);
+      try {
+        const response = await searchMovies(searchQuery);
+        setResults(response.data.results);
+      } catch (error) {
+        handleApiError(error);
+      } finally {
+        setLoading(false);
+      }
+    }, 500),
+    []
+  );
+
+  const handleSearch = (searchQuery) => {
+    setQuery(searchQuery);
+    debouncedSearch(searchQuery);
   };
 
   const handleBackToTrends = () => {
@@ -144,10 +160,10 @@ const Search = ({ navigation }) => {
         <TextInput
           label="Search for movies"
           value={query}
-          onChangeText={setQuery}
+          onChangeText={handleSearch}
           style={styles.input}
         />
-        <Button mode="contained" onPress={handleSearch} style={styles.button}>
+        <Button mode="contained" onPress={() => debouncedSearch(query)} style={styles.button}>
           Search
         </Button>
       </View>
@@ -158,6 +174,13 @@ const Search = ({ navigation }) => {
       ) : (
         renderInitialContent()
       )}
+      <Snackbar
+        visible={snackbarVisible}
+        onDismiss={() => setSnackbarVisible(false)}
+        duration={Snackbar.DURATION_SHORT}
+      >
+        {errorMessage}
+      </Snackbar>
     </ScrollView>
   );
 };
