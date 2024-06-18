@@ -81,6 +81,7 @@ body {
     padding: 10px;
     border-radius: 8px;
     transition: transform 0.3s;
+    flex-shrink: 0; /* Prevent flex items from shrinking */
   }
   
   .movie:hover {
