@@ -51,9 +51,10 @@ body {
     display: none;
   }
   
-  .horizontal-list div {
+  .horizontal-list .movie {
     min-width: 150px;
     margin-right: 10px;
+    text-align: center;
   }
   
   #results-section {
@@ -68,5 +69,15 @@ body {
     position: fixed;
     width: 100%;
     bottom: 0;
+  }
+  
+  .movie img {
+    width: 100%;
+    border-radius: 8px;
+  }
+  
+  .movie p {
+    margin: 5px 0 0 0;
+    color: #333;
   }
   
